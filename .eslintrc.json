@@ -32,7 +32,16 @@
         }
       }
     ],
-    "valid-jsdoc": "warn",
+    "valid-jsdoc": [
+      "warn",
+      {
+        "prefer": {
+          "return": "returns"
+        },
+        "requireReturnDescription": false,
+        "requireParamDescription": false
+      }
+    ],
     "object-curly-spacing": "off",
     "comma-dangle": ["error", "never"]
   }
