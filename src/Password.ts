@@ -23,6 +23,7 @@ export default abstract class Password {
    * @param {number} expire when the password expires
    * @param {string} password password
    * @param {string} key encryption key
+   * @returns {void}
    */
   public set(
     site: string,
