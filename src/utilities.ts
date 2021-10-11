@@ -14,7 +14,11 @@ export interface EncryptedData {
  */
 export function encrypt(input: any, key: string): EncryptedData {
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(AES, Buffer.from(key), iv);
+  const cipher = crypto.createCipheriv(
+    AES,
+    hash(key, 'base64').substr(0, 32),
+    iv
+  );
 
   let encrypted = cipher.update(input);
 
@@ -32,7 +36,11 @@ export function encrypt(input: any, key: string): EncryptedData {
 export function decrypt(input: EncryptedData, key: string): string {
   const iv = Buffer.from(input.iv, 'hex');
   const encrypted = Buffer.from(input.data, 'hex');
-  const decipher = crypto.createDecipheriv(AES, Buffer.from(key), iv);
+  const decipher = crypto.createDecipheriv(
+    AES,
+    hash(key, 'base64').substr(0, 32),
+    iv
+  );
   let decrypted = decipher.update(encrypted);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
 
@@ -42,8 +50,12 @@ export function decrypt(input: EncryptedData, key: string): string {
 /**
  * Hashes a given input
  * @param {number} input Input string
+ * @param {crypto.BinaryToTextEncoding} encoding
  * @returns {string}
  */
-export function hash(input: string): string {
-  return crypto.createHash('sha256').update(input).digest('hex');
+export function hash(
+  input: string,
+  encoding: crypto.BinaryToTextEncoding = 'hex'
+): string {
+  return crypto.createHash('sha256').update(input).digest(encoding);
 }

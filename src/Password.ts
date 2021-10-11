@@ -1,4 +1,4 @@
-import { decrypt, encrypt, EncryptedData, hash } from './utilities';
+import { decrypt, encrypt, EncryptedData } from './utilities';
 
 export interface UserData {
   passwordSite: string;
@@ -31,12 +31,10 @@ export default abstract class Password {
     password: string,
     key: string
   ) {
-    const hashedKey = hash(key);
-
-    this.passwordSite = encrypt(site, hashedKey);
-    this.username = encrypt(user, hashedKey);
+    this.passwordSite = encrypt(site, key);
+    this.username = encrypt(user, key);
     this.passwordExpire = expire;
-    this.encryptedPassword = encrypt(password, hashedKey);
+    this.encryptedPassword = encrypt(password, key);
   }
 
   /**
@@ -44,13 +42,11 @@ export default abstract class Password {
    * @returns {UserData}
    */
   public decrypt(key: string): UserData {
-    const hashedKey = hash(key);
-
     return {
-      passwordSite: decrypt(this.passwordSite, hashedKey),
-      username: decrypt(this.username, hashedKey),
+      passwordSite: decrypt(this.passwordSite, key),
+      username: decrypt(this.username, key),
       passwordExpire: this.passwordExpire,
-      password: decrypt(this.encryptedPassword, hashedKey)
+      password: decrypt(this.encryptedPassword, key)
     };
   }
 }
