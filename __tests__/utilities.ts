@@ -3,7 +3,7 @@
 import { decrypt, encrypt } from '../src/utilities';
 import { chance } from 'jest-chance';
 
-describe('utilities', () => {
+describe('utilities.ts', () => {
   describe('encrypt() and decrypt()', () => {
     it('should return the input after decrypting', () => {
       const input = chance.string();
