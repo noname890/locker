@@ -47,3 +47,12 @@ function classToObj(classInstance: object): object {
 export function serializeObj(obj: object) {
   return serialize(classToObj(obj)).replace(/[\r\n]+/g, '');
 }
+
+/**
+ * Deserializes a serialized object.
+ * @param {string} serialized
+ * @returns {object}
+ */
+export function deserialize(serialized: string): object {
+  return new Function(`return (${serialized})`)();
+}
