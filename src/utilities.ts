@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { gzipSync, unzipSync } from 'zlib';
 
 const AES = 'aes-256-cbc';
 
@@ -58,4 +59,19 @@ export function hash(
   encoding: crypto.BinaryToTextEncoding = 'hex'
 ): string {
   return crypto.createHash('sha256').update(input).digest(encoding);
+}
+/**
+ * @param {string} input
+ * @returns {Buffer}
+ */
+export function compress(input: string): Buffer {
+  return gzipSync(Buffer.from(input));
+}
+
+/**
+ * @param {Buffer} input
+ * @returns {string}
+ */
+export function decompress(input: Buffer): string {
+  return unzipSync(input).toString();
 }
