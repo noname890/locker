@@ -1,4 +1,4 @@
-import { existsSync, rmSync } from 'fs';
+import { existsSync, readFileSync, rmSync } from 'fs';
 import { chance } from 'jest-chance';
 import LockerFileManager from '../src/LockerfileManager';
 
@@ -9,6 +9,19 @@ describe('LockerfileManager.ts', () => {
   if (existsSync(tempPath)) {
     rmSync(tempPath);
   }
+
+  describe('LockerFileManager.checkIfValid()', () => {
+    const fakeLocker = { masterKey };
+
+    it('should return true', () => {
+      expect(LockerFileManager.checkIfValid(fakeLocker, masterKey)).toBe(true);
+    });
+    it('should return false', () => {
+      expect(
+        LockerFileManager.checkIfValid(fakeLocker, masterKey.repeat(2))
+      ).toBe(false);
+    });
+  });
 
   describe('LockerFileManager.createLockerfile()', () => {
     it('should not throw', () => {
@@ -21,13 +34,19 @@ describe('LockerfileManager.ts', () => {
   describe('LockerFileManager.decompressAndDecrypt()', () => {
     it('should not throw', () => {
       expect(() =>
-        LockerFileManager.decompressAndDecrypt(tempPath, masterKey)
+        LockerFileManager.decompressAndDecrypt(
+          readFileSync(tempPath),
+          masterKey
+        )
       ).not.toThrow();
     });
 
     it('should correctly deserialize the Lockerfile', () => {
       expect(
-        LockerFileManager.decompressAndDecrypt(tempPath, masterKey)
+        LockerFileManager.decompressAndDecrypt(
+          readFileSync(tempPath),
+          masterKey
+        )
       ).toStrictEqual({
         masterKey
       });
