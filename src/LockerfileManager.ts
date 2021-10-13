@@ -13,14 +13,15 @@ import {
  * Manages `Lockerfile`
  */
 export default class LockerFileManager {
-  private lockerFile: string;
+  private lockerFile!: Record<string, any>;
 
   /**
    *
    * @param {string} path Path to the `Lockerfile`
+   * @param {string} masterKey
    */
-  constructor(public path: string) {
-    this.lockerFile = readFileSync(path, 'utf-8');
+  constructor(public path: string, masterKey: string) {
+    this.open(masterKey);
   }
 
   /**
@@ -60,15 +61,11 @@ export default class LockerFileManager {
 
   /**
    * Utility function
-   * @param {string} lockerFilePath the `Lockerfile` to decrypt and decompress
+   * @param {string} lockerFile the `Lockerfile` to decrypt and decompress
    * @param {string} masterKey masterkey of the `Lockerfile`
    * @returns {Buffer} the encrypted and compressed `Lockerfile`
    */
-  public static decompressAndDecrypt(
-    lockerFilePath: string,
-    masterKey: string
-  ) {
-    const lockerFile = readFileSync(lockerFilePath);
+  public static decompressAndDecrypt(lockerFile: Buffer, masterKey: string) {
     const decryptedLockerFile = deserialize(
       decrypt(deserialize(decompress(lockerFile)) as EncryptedData, masterKey)
     ) as Record<string, any>;
@@ -91,5 +88,69 @@ export default class LockerFileManager {
     masterKey: string
   ) {
     return lockerFile.masterKey === masterKey;
+  }
+
+  /**
+   * Opens the `Lockerfile`, throws an `Error` if the `Lockerfile` does not exist.
+   * @param {string} masterKey
+   * @returns {void}
+   */
+  public open(masterKey: string) {
+    if (!existsSync(this.path)) throw new Error(constants.NO_LOCKERFILE_FOUND);
+    this.lockerFile = LockerFileManager.decompressAndDecrypt(
+      readFileSync(this.path),
+      masterKey
+    );
+  }
+
+  /**
+   * Adds entries into the `Lockerfile`, but does not overwrite them.
+   * @param {Record<string, any>} obj
+   * @returns {void}
+   */
+  public add(obj: Record<string, any>) {
+    for (const i in obj) {
+      if (this.lockerFile[i]) {
+        throw new Error(constants.NO_OVEWRITE(i));
+      }
+      this.lockerFile[i] = obj[i];
+    }
+  }
+
+  /**
+   * Updates the `Lockerfile`'s entries, but does not create them.
+   * Does not update the Master Key
+   * @param {Record<string, any>} obj
+   * @returns {void}
+   */
+  public update(obj: Record<string, any>) {
+    for (const i in obj) {
+      if (i === 'masterKey') throw new Error(constants.NO_OVERWRITE_MASTERKEY);
+      if (!this.lockerFile[i]) {
+        throw new Error(constants.FIELD_DOES_NOT_EXIST(i));
+      }
+      this.lockerFile[i] = obj[i];
+    }
+  }
+
+  /**
+   * Writes the changes to the `Lockerfile`
+   * @param {string} masterKey
+   * @returns {void}
+   */
+  public flush(masterKey: string) {
+    writeFileSync(
+      this.path,
+      LockerFileManager.compressAndEncrypt(this.lockerFile, masterKey)
+    );
+  }
+
+  /**
+   * Returns the current `Lockerfile`'s content. Used for testing.
+   * @api private
+   * @returns {Record<string, any>}
+   */
+  public _getLockerFileContent() {
+    return this.lockerFile;
   }
 }
