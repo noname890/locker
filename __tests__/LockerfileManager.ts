@@ -2,14 +2,16 @@ import { existsSync, readFileSync, rmSync } from 'fs';
 import { chance } from 'jest-chance';
 import LockerFileManager from '../src/LockerfileManager';
 
-describe('LockerfileManager.ts', () => {
-  const tempPath = process.cwd() + '/Lockerfile';
-  const masterKey = chance.string();
+const tempPath = process.cwd() + '/Lockerfile';
+const masterKey = chance.string();
 
+beforeAll(() => {
   if (existsSync(tempPath)) {
     rmSync(tempPath);
   }
+});
 
+describe('LockerfileManager.ts', () => {
   describe('LockerFileManager.checkIfValid()', () => {
     const fakeLocker = { masterKey };
 
