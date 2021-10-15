@@ -15,9 +15,6 @@ import validate, {
  */
 class TestClass {
   public test = 'string';
-  /**
-   * Test fn
-   */
   public fn(arg: any) {
     return arg;
   }
@@ -49,6 +46,25 @@ describe('serialize.ts', () => {
       expect(() =>
         validate(rule, deserialize(serialized) as Record<string, unknown>)
       ).not.toThrow();
+    });
+
+    it('should be able to call class members', () => {
+      /* eslint require-jsdoc: */
+      class TestClass {
+        public test1() {
+          return 1 + this.test2();
+        }
+        public test2() {
+          return 1;
+        }
+      }
+
+      const serialized = serialize({
+        testClass: new TestClass()
+      });
+      const deserialized = deserialize(serialized) as Record<string, any>;
+
+      expect(deserialized.testClass.test1()).toBe(2);
     });
   });
 
