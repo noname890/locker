@@ -32,6 +32,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "otpauth": "^7.0.6",
     "serialize-javascript": "^6.0.0"
   }
 }
