@@ -1,9 +1,7 @@
-import { decrypt, encrypt, EncryptedData } from './utilities';
-
 export interface UserData {
   passwordSite: string;
   username: string;
-  passwordExpire: number;
+  passwordExpire: Date;
   password: string;
 }
 
@@ -11,43 +9,30 @@ export interface UserData {
  * Internal abstract `Password` class
  */
 export default abstract class Password {
-  private passwordSite!: EncryptedData;
-  private username!: EncryptedData;
-  private passwordExpire!: number;
-  private encryptedPassword!: EncryptedData;
+  public passwordSite!: string;
+  public username!: string;
+  public passwordExpire!: Date;
+  public encryptedPassword!: string;
 
   /**
    *
    * @param {string} site login site
    * @param {string} user username
-   * @param {number} expire when the password expires
+   * @param {number} expire when does the password expires
    * @param {string} password password
    * @param {string} key encryption key
    * @returns {void}
    */
-  public set(
-    site: string,
-    user: string,
-    expire: number,
-    password: string,
-    key: string
-  ) {
-    this.passwordSite = encrypt(site, key);
-    this.username = encrypt(user, key);
+  constructor(site: string, user: string, expire: Date, password: string) {
+    this.passwordSite = site;
+    this.username = user;
     this.passwordExpire = expire;
-    this.encryptedPassword = encrypt(password, key);
+    this.encryptedPassword = password;
   }
 
   /**
    * @param {string} key decryption key
    * @returns {UserData}
    */
-  public decrypt(key: string): UserData {
-    return {
-      passwordSite: decrypt(this.passwordSite, key),
-      username: decrypt(this.username, key),
-      passwordExpire: this.passwordExpire,
-      password: decrypt(this.encryptedPassword, key)
-    };
-  }
+  public abstract getData(): UserData;
 }
